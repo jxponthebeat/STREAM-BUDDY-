@@ -133,7 +133,9 @@
   .pane-tag .lab{font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .pane-tag .spk{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:var(--cyan);background:var(--elev)}
   .pane-tag .spk.muted{color:var(--muted-2)}
+  .pane-tag .spk.on{color:#04231f;background:var(--cyan)}
   .pane-tag .spk:hover{background:var(--elev-2)}
+  .pane.audible .pane-tag{border-color:var(--cyan)}
   .pane-tag .pane-x{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:var(--muted);background:var(--elev)}
   .pane-tag .pane-x:hover{color:var(--tally);background:var(--elev-2)}
   .mute-hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:5;display:none;align-items:center;gap:8px;background:rgba(255,68,94,.92);color:#fff;font-weight:600;font-size:12.5px;border-radius:30px;padding:8px 15px 8px 13px;box-shadow:var(--shadow)}
@@ -164,8 +166,17 @@
   .chat-head .live{width:7px;height:7px;border-radius:50%;background:var(--tally);box-shadow:0 0 8px var(--tally-glow)}
   .chat-head .close{margin-left:auto;color:var(--muted);width:28px;height:28px;border-radius:7px;display:grid;place-items:center}
   .chat-head .close:hover{background:var(--elev);color:var(--text)}
+  .chat-tabs{flex:none;display:flex;gap:4px;padding:6px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+  .chat-tabs::-webkit-scrollbar{display:none}
+  .chat-tab{flex:none;display:flex;align-items:center;gap:6px;max-width:150px;padding:6px 10px;border-radius:8px;background:var(--elev);border:1px solid transparent;color:var(--muted);font-size:12px;font-weight:500;white-space:nowrap}
+  .chat-tab:hover{color:var(--text)}
+  .chat-tab.sel{background:var(--elev-2);border-color:var(--cyan);color:var(--text)}
+  .chat-tab .cd{width:6px;height:6px;border-radius:50%;flex:none}
+  .chat-tab .cn{overflow:hidden;text-overflow:ellipsis}
+  .chat-tab .ci{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--muted-2)}
   .chat-frame{flex:1;position:relative;background:#0e0e10}
-  .chat-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .chat-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:none}
+  .chat-frame iframe.show{display:block}
   .chat-na{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--muted-2);font-size:12.5px;line-height:1.7}
 
   /* CONTROLS */
@@ -203,6 +214,10 @@
   .mg4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
   .mg5{grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr}
   .lp-div{height:1px;background:var(--border);margin:9px 2px}
+  .seg{display:flex;gap:3px;background:var(--elev);border:1px solid var(--border);border-radius:10px;padding:3px}
+  .seg-b{flex:1;height:30px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--muted)}
+  .seg-b:hover{color:var(--text)}
+  .seg-b.sel{background:var(--elev-2);color:var(--cyan)}
   .speed-btn{height:38px;border-radius:10px;background:var(--elev);border:1px solid var(--border);color:var(--text);font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px}
   .speed-btn:hover:not(:disabled){border-color:var(--muted-2)}
   .speed-btn:disabled{opacity:.6;cursor:default}
@@ -325,6 +340,7 @@
         <div id="panes"></div>
         <aside class="chat-panel" id="chatPanel">
           <div class="chat-head"><span class="live"></span>Live chat<button class="close" id="chatClose" aria-label="Close chat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+          <div class="chat-tabs" id="chatTabs"></div>
           <div class="chat-frame" id="chatFrame"></div>
         </aside>
       </div>
@@ -360,6 +376,13 @@
   <div class="lp-title">Screens</div>
   <div class="lay-opts" id="layOpts"></div>
   <div class="lp-div"></div>
+  <div class="lp-title">Audio</div>
+  <div class="seg" id="audioSeg">
+    <button class="seg-b" data-solo="1">Solo</button>
+    <button class="seg-b" data-solo="0">Mix</button>
+  </div>
+  <div class="speed-note" id="audioNote"></div>
+  <div class="lp-div"></div>
   <div class="lp-title">Connection</div>
   <button class="speed-btn" id="speedBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20a8 8 0 1 0-8-8"/><path d="M12 12l4-3"/></svg>Test my connection</button>
   <div class="speed-out" id="speedOut">Estimates a safe number of simultaneous streams for your internet.</div>
@@ -382,7 +405,7 @@
   var PLATFORMS={twitch:"Twitch",youtube:"YouTube",kick:"Kick"};
   var MAXSLOTS=5;
 
-  var state={streams:[],filter:"all",chatOpen:false,layout:1,slots:[null,null,null,null,null],focus:0,mute:[true,true,true,true,true],speed:null,stack:true};
+  var state={streams:[],filter:"all",chatOpen:false,chatSlot:0,layout:1,slots:[null,null,null,null,null],focus:0,mute:[true,true,true,true,true],speed:null,stack:true,solo:true};
 
   function load(){
     try{
@@ -395,6 +418,8 @@
         if(d.mute&&d.mute.length===MAXSLOTS)state.mute=d.mute;
         state.speed=d.speed||null;
         if(typeof d.stack==="boolean")state.stack=d.stack;
+        if(typeof d.solo==="boolean")state.solo=d.solo;
+        if(typeof d.chatSlot==="number")state.chatSlot=Math.min(MAXSLOTS-1,Math.max(0,d.chatSlot));
         return;
       }
       // migrate from v2 (single/dual model)
@@ -407,7 +432,7 @@
     }catch(e){}
   }
   function save(){
-    try{localStorage.setItem(STORE,JSON.stringify({streams:state.streams,filter:state.filter,layout:state.layout,slots:state.slots,focus:state.focus,mute:state.mute,speed:state.speed,stack:state.stack}));}catch(e){}
+    try{localStorage.setItem(STORE,JSON.stringify({streams:state.streams,filter:state.filter,layout:state.layout,slots:state.slots,focus:state.focus,mute:state.mute,speed:state.speed,stack:state.stack,solo:state.solo,chatSlot:state.chatSlot}));}catch(e){}
   }
 
   /* ---- parsing ---- */
@@ -443,12 +468,30 @@
       return base+"&parent="+HOST+"&autoplay=true&muted="+(m?"true":"false");
     }
     if(s.platform==="youtube"){
-      if(s.type==="ytchannel")return"https://www.youtube.com/embed/live_stream?channel="+encodeURIComponent(s.ref)+"&autoplay=1&mute="+(m?"1":"0");
-      if(s.type==="ythandle")return null;
-      return"https://www.youtube.com/embed/"+encodeURIComponent(s.ref)+"?autoplay=1&mute="+(m?"1":"0");
+      var yt;
+      if(s.type==="ytchannel")yt="https://www.youtube.com/embed/live_stream?channel="+encodeURIComponent(s.ref);
+      else if(s.type==="ythandle")return null;
+      else yt="https://www.youtube.com/embed/"+encodeURIComponent(s.ref);
+      return yt+(yt.indexOf("?")>0?"&":"?")+"autoplay=1&playsinline=1&enablejsapi=1&origin="+encodeURIComponent(location.origin)+"&mute="+(m?"1":"0");
     }
     if(s.platform==="kick")return"https://player.kick.com/"+encodeURIComponent(s.ref)+"?autoplay=true&muted="+(m?"true":"false");
     return null;
+  }
+  // identity of a player, ignoring mute — lets us change audio without rebuilding the frame
+  function playerKey(s){var src=playerSrc(s,false);return src?src.replace(/[?&](muted|mute)=[^&]*/g,""):null;}
+
+  /* YouTube IFrame API over postMessage: mute/unmute with no reload */
+  function ytCmd(f,func,args){
+    try{f.contentWindow.postMessage(JSON.stringify({event:"command",func:func,args:args||[]}),"*");}catch(e){}
+  }
+  function ytApplyAudio(f,muted){
+    [0,300,900,1800].forEach(function(d){
+      setTimeout(function(){
+        if(!f.isConnected)return;
+        if(muted){ytCmd(f,"mute");}
+        else{ytCmd(f,"unMute");ytCmd(f,"setVolume",[100]);}
+      },d);
+    });
   }
   function chatSrc(s){
     if(s.platform==="twitch"&&s.type==="channel")return"https://www.twitch.tv/embed/"+encodeURIComponent(s.ref)+"/chat?parent="+HOST+"&darkpopout";
@@ -499,16 +542,33 @@
     if(ev)ev.stopPropagation();
     state.streams=state.streams.filter(function(s){return s.id!==id;});
     for(var i=0;i<MAXSLOTS;i++){if(state.slots[i]===id)state.slots[i]=null;}
-    save();render();
+    normalizeAudio();save();render();
   }
   function toggleFav(id,ev){if(ev)ev.stopPropagation();var s=byId(id);if(!s)return;s.fav=!s.fav;save();render();}
   function selectStream(id){setActive(id);if(state.chatOpen&&!hasChat(focusedStream()))state.chatOpen=false;save();render();closeMobileSidebar();}
-  function toggleMute(k,ev){if(ev)ev.stopPropagation();state.mute[k]=!state.mute[k];save();renderStage();}
-  function unmuteKey(k,ev){if(ev)ev.stopPropagation();state.mute[k]=false;save();renderStage();}
+  function audibleIdx(){for(var i=0;i<state.layout;i++){if(state.slots[i]&&!state.mute[i])return i;}return -1;}
+  function muteAll(){for(var i=0;i<MAXSLOTS;i++)state.mute[i]=true;}
+  // Solo (default): exactly one stream has sound. Tapping the live one silences everything.
+  function setAudioTo(i,ev){
+    if(ev)ev.stopPropagation();
+    if(!state.slots[i])return;
+    if(state.solo){
+      if(audibleIdx()===i)muteAll();
+      else{for(var j=0;j<MAXSLOTS;j++)state.mute[j]=(j!==i);}
+    }else{
+      state.mute[i]=!state.mute[i];
+    }
+    save();renderStage();
+  }
+  function normalizeAudio(){
+    // never leave sound on a hidden or empty screen
+    for(var i=0;i<MAXSLOTS;i++){if(i>=state.layout||!state.slots[i])state.mute[i]=true;}
+    if(state.solo){var seen=false;for(var j=0;j<state.layout;j++){if(!state.mute[j]){if(seen)state.mute[j]=true;else seen=true;}}}
+  }
   function setLayout(n){
     n=Math.min(MAXSLOTS,Math.max(1,n));
     if(state.focus>n-1)state.focus=n-1;
-    state.layout=n;save();render();
+    state.layout=n;normalizeAudio();save();render();
   }
 
   /* ---- layout popover ---- */
@@ -527,7 +587,15 @@
     var wrap=document.getElementById("layOpts");wrap.innerHTML="";
     for(var n=1;n<=MAXSLOTS;n++)wrap.appendChild(buildLayoutOption(n));
   }
-  function openLayout(){renderLayoutOptions();document.getElementById("layoutPop").classList.add("open");document.getElementById("layoutScrim").classList.add("on");document.getElementById("layoutBtn").classList.add("on");}
+  function renderAudioSeg(){
+    document.querySelectorAll("#audioSeg .seg-b").forEach(function(b){
+      b.classList.toggle("sel",(b.dataset.solo==="1")===state.solo);
+    });
+    document.getElementById("audioNote").innerHTML=state.solo
+      ? "One stream has sound at a time \u2014 tapping a speaker moves the audio to it. Most reliable."
+      : "Several at once. Note: iPhones only allow one audio stream at a time, so streams may fight or duck.";
+  }
+  function openLayout(){renderLayoutOptions();renderAudioSeg();document.getElementById("layoutPop").classList.add("open");document.getElementById("layoutScrim").classList.add("on");document.getElementById("layoutBtn").classList.add("on");}
   function closeLayout(){document.getElementById("layoutPop").classList.remove("open");document.getElementById("layoutScrim").classList.remove("on");document.getElementById("layoutBtn").classList.remove("on");}
 
   /* ---- speed test ---- */
@@ -615,24 +683,35 @@
       ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg>'
       : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg>';
   }
-  function updatePlayer(wrap,s,compact,muted){
+  function updatePlayer(wrap,s,compact,muted,showHint){
     var iframe=wrap.querySelector("iframe");
     var hint=wrap.querySelector(".mute-hint");
     if(!s){if(iframe)iframe.remove();if(hint)hint.classList.remove("show");setPh(wrap,"empty",null,compact);return;}
-    var src=playerSrc(s,muted);
-    if(!src){if(iframe)iframe.remove();if(hint)hint.classList.remove("show");setPh(wrap,"handle",s,compact);return;}
+    var key=playerKey(s);
+    if(!key){if(iframe)iframe.remove();if(hint)hint.classList.remove("show");setPh(wrap,"handle",s,compact);return;}
     var p=wrap.querySelector(".ph");if(p)p.style.display="none";
-    if(!iframe||iframe.getAttribute("data-src")!==src){
+    if(!iframe||iframe.getAttribute("data-key")!==key){
+      // different stream -> build the player fresh
       if(iframe)iframe.remove();
       iframe=document.createElement("iframe");
-      iframe.setAttribute("data-src",src);
+      iframe.setAttribute("data-key",key);
+      iframe.setAttribute("data-muted",String(!!muted));
       iframe.setAttribute("allowfullscreen","");
       iframe.setAttribute("allow","autoplay; fullscreen; encrypted-media; picture-in-picture");
       iframe.setAttribute("scrolling","no");
-      iframe.src=src;
+      iframe.src=playerSrc(s,muted);
+      if(s.platform==="youtube"&&!muted)iframe.addEventListener("load",function(){ytApplyAudio(iframe,false);});
       wrap.appendChild(iframe);
+    }else if(iframe.getAttribute("data-muted")!==String(!!muted)){
+      // same stream, audio changed
+      iframe.setAttribute("data-muted",String(!!muted));
+      if(s.platform==="youtube"){
+        ytApplyAudio(iframe,!!muted); // instant, no reload
+      }else{
+        iframe.src=playerSrc(s,muted); // Twitch/Kick have no audio API — must reload
+      }
     }
-    if(hint)hint.classList.toggle("show",!!muted);
+    if(hint)hint.classList.toggle("show",!!showHint);
   }
 
   function buildPane(i){
@@ -642,11 +721,11 @@
     var hintHtml='<button class="mute-hint" aria-label="Tap for sound">'+spkIcon(false)+'<span>Tap for sound</span></button>';
     var tagHtml=multi?'<div class="pane-tag"><span class="idx">'+(i+1)+'</span><span class="plab"></span><span class="lab"></span><button class="spk" aria-label="Mute or unmute"></button><button class="pane-x" aria-label="Clear screen"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>':'';
     pane.innerHTML='<div class="player-wrap">'+hintHtml+'</div>'+tagHtml;
-    pane.querySelector(".mute-hint").addEventListener("click",function(e){unmuteKey(i,e);});
+    pane.querySelector(".mute-hint").addEventListener("click",function(e){setAudioTo(i,e);});
     if(multi){
       pane.addEventListener("click",function(){state.focus=i;save();renderStage();});
-      pane.querySelector(".spk").addEventListener("click",function(e){toggleMute(i,e);});
-      pane.querySelector(".pane-x").addEventListener("click",function(e){e.stopPropagation();state.slots[i]=null;save();render();});
+      pane.querySelector(".spk").addEventListener("click",function(e){setAudioTo(i,e);});
+      pane.querySelector(".pane-x").addEventListener("click",function(e){e.stopPropagation();state.slots[i]=null;normalizeAudio();save();render();});
     }
     return pane;
   }
@@ -660,17 +739,25 @@
       panes.innerHTML="";
       for(var i=0;i<n;i++)panes.appendChild(buildPane(i));
     }
+    normalizeAudio();
+    var aud=audibleIdx();
     for(var i=0;i<n;i++){
       var pane=panes.children[i];
       var st=byId(state.slots[i]);
       var muted=!!state.mute[i];
+      var isAud=(!muted&&!!st);
       pane.classList.toggle("focused",multi&&state.focus===i);
-      updatePlayer(pane.querySelector(".player-wrap"),st,multi,muted);
+      pane.classList.toggle("audible",isAud);
+      // only nag "tap for sound" when literally nothing is audible
+      updatePlayer(pane.querySelector(".player-wrap"),st,multi,muted,!!st&&aud===-1);
       if(multi){
         var lab=pane.querySelector(".lab"),plab=pane.querySelector(".plab"),spk=pane.querySelector(".spk");
         lab.textContent=st?cleanLabel(st):"Empty — tap a stream";
         plab.style.background=st?"var(--"+st.platform+")":"var(--muted-2)";
-        spk.innerHTML=spkIcon(muted);spk.classList.toggle("muted",muted);spk.style.display=st?"grid":"none";
+        spk.innerHTML=spkIcon(muted);
+        spk.classList.toggle("muted",muted);
+        spk.classList.toggle("on",isAud);
+        spk.style.display=st?"grid":"none";
       }
     }
 
@@ -692,27 +779,81 @@
     audioBtn.disabled=!s;
     audioBtn.classList.toggle("on",!!s&&!fmuted);
     audioBtn.querySelector(".ico").innerHTML=spkIcon(fmuted);
-    audioBtn.querySelector("span").textContent=fmuted?"Sound off":"Sound on";
-    var canChat=hasChat(s);
+    audioBtn.querySelector("span").textContent=fmuted?(multi?"Sound here":"Sound on"):"Sound on";
+    var canChat=chatAvail().length>0;
     chatBtn.disabled=!canChat;
-    chatBtn.title=canChat?"":"Live chat isn't available for this link";
+    chatBtn.title=canChat?"":"No loaded stream has a readable chat";
     if(!canChat&&state.chatOpen)state.chatOpen=false;
     chatBtn.classList.toggle("on",state.chatOpen);
 
     if(!s){nowTitle.innerHTML='<span class="idle">'+(multi?"Screen "+(fi+1)+" is empty":"No stream selected")+'</span>';}
     else{nowTitle.innerHTML=(multi?'<span class="p">'+(fi+1)+'</span>':'')+'<span class="pdot" style="background:var(--'+s.platform+')"></span><span class="t">'+esc(cleanLabel(s))+'</span><span class="p">'+PLATFORMS[s.platform]+'</span>';}
 
-    // chat
-    var panel=document.getElementById("chatPanel"),frame=document.getElementById("chatFrame");
-    if(state.chatOpen&&canChat){
-      panel.classList.add("open");
-      var csrc=chatSrc(s),cf=frame.querySelector("iframe");
-      if(!cf||cf.getAttribute("data-src")!==csrc){
-        frame.innerHTML="";
-        var na=document.createElement("div");na.className="chat-na";na.textContent="Loading chat\u2026 if it stays blank, this platform is blocking embedded chat here.";frame.appendChild(na);
-        var ci=document.createElement("iframe");ci.setAttribute("data-src",csrc);ci.src=csrc;ci.addEventListener("load",function(){na.style.display="none";});frame.appendChild(ci);
-      }
-    }else{panel.classList.remove("open");}
+    renderChat();
+  }
+
+  /* ---- chat: tabs across every loaded stream ---- */
+  function chatAvail(){
+    var out=[];
+    for(var i=0;i<state.layout;i++){
+      var st=byId(state.slots[i]);
+      if(st&&hasChat(st))out.push({i:i,s:st});
+    }
+    return out;
+  }
+  function renderChat(){
+    var panel=document.getElementById("chatPanel");
+    var frame=document.getElementById("chatFrame");
+    var tabsEl=document.getElementById("chatTabs");
+    var avail=chatAvail();
+
+    if(!state.chatOpen||avail.length===0){panel.classList.remove("open");return;}
+    panel.classList.add("open");
+
+    // keep the selected tab valid
+    var ok=false;for(var k=0;k<avail.length;k++){if(avail[k].i===state.chatSlot){ok=true;break;}}
+    if(!ok)state.chatSlot=avail[0].i;
+
+    // tabs (hidden when there's only one chat to read)
+    tabsEl.style.display=avail.length>1?"flex":"none";
+    tabsEl.innerHTML="";
+    avail.forEach(function(a){
+      var b=document.createElement("button");
+      b.className="chat-tab"+(a.i===state.chatSlot?" sel":"");
+      b.innerHTML='<span class="ci">'+(a.i+1)+'</span><span class="cd" style="background:var(--'+a.s.platform+')"></span><span class="cn">'+esc(cleanLabel(a.s))+'</span>';
+      b.addEventListener("click",function(){state.chatSlot=a.i;save();renderChat();});
+      tabsEl.appendChild(b);
+    });
+
+    // frames: build once per chat, then just show/hide so switching is instant
+    var validKeys={};
+    avail.forEach(function(a){validKeys[chatSrc(a.s)]=true;});
+    Array.prototype.slice.call(frame.querySelectorAll("iframe")).forEach(function(f){
+      if(!validKeys[f.getAttribute("data-key")])f.remove(); // stream no longer loaded
+      else f.classList.remove("show");
+    });
+
+    var active=byId(state.slots[state.chatSlot]);
+    if(!active)return;
+    var key=chatSrc(active);
+    var found=null;
+    Array.prototype.slice.call(frame.querySelectorAll("iframe")).forEach(function(f){
+      if(f.getAttribute("data-key")===key)found=f;
+    });
+    var na=frame.querySelector(".chat-na");
+    if(!na){na=document.createElement("div");na.className="chat-na";frame.appendChild(na);}
+    if(!found){
+      na.textContent="Loading chat\u2026 if it stays blank, this platform is blocking embedded chat here.";
+      na.style.display="flex";
+      found=document.createElement("iframe");
+      found.setAttribute("data-key",key);
+      found.src=key;
+      found.addEventListener("load",function(){na.style.display="none";});
+      frame.appendChild(found);
+    }else{
+      na.style.display="none";
+    }
+    found.classList.add("show");
   }
 
   /* ---- who's live ---- */
@@ -805,9 +946,26 @@
     document.getElementById("layoutBtn").addEventListener("click",function(){var open=document.getElementById("layoutPop").classList.contains("open");if(open)closeLayout();else openLayout();});
     document.getElementById("layoutScrim").addEventListener("click",closeLayout);
     document.getElementById("speedBtn").addEventListener("click",runSpeed);
+    document.querySelectorAll("#audioSeg .seg-b").forEach(function(b){
+      b.addEventListener("click",function(){
+        var wantSolo=(b.dataset.solo==="1");
+        if(wantSolo===state.solo)return;
+        state.solo=wantSolo;
+        if(state.solo){var a=audibleIdx();muteAll();if(a>=0)state.mute[a]=false;}
+        normalizeAudio();save();renderAudioSeg();renderStage();
+      });
+    });
     document.getElementById("stackBtn").addEventListener("click",function(){state.stack=!state.stack;save();renderStage();toast(state.stack?"Stacked \u2014 each stream fills the width at 16:9.":"Grid view \u2014 tiles share the screen.");});
-    document.getElementById("audioBtn").addEventListener("click",function(){if(this.disabled)return;toggleMute(focusIdx());});
-    document.getElementById("chatBtn").addEventListener("click",function(){if(this.disabled)return;state.chatOpen=!state.chatOpen;save();renderStage();});
+    document.getElementById("audioBtn").addEventListener("click",function(){if(this.disabled)return;setAudioTo(focusIdx());});
+    document.getElementById("chatBtn").addEventListener("click",function(){
+      if(this.disabled)return;
+      if(!state.chatOpen){
+        var avail=chatAvail(),fi=focusIdx(),pick=avail[0]?avail[0].i:0;
+        for(var k=0;k<avail.length;k++){if(avail[k].i===fi){pick=fi;break;}}
+        state.chatSlot=pick;
+      }
+      state.chatOpen=!state.chatOpen;save();renderStage();
+    });
     document.getElementById("chatClose").addEventListener("click",function(){state.chatOpen=false;renderStage();});
     document.getElementById("fsBtn").addEventListener("click",function(){if(!this.disabled)toggleFull();});
     document.getElementById("lockBtn").addEventListener("click",function(){if(!this.disabled)setLock(true);});
