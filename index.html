@@ -114,13 +114,18 @@
   /* STAGE */
   .stage{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg)}
   .player-shell{flex:1;display:flex;min-height:0;position:relative}
-  #panes{flex:1;display:flex;min-width:0}
-  #panes.dual{gap:2px;background:var(--border)}
-  .pane{position:relative;flex:1;min-width:0;background:#000}
-  #panes.dual .pane.focused{outline:2px solid var(--cyan);outline-offset:-2px;z-index:2}
+  #panes{flex:1;min-width:0;display:grid;grid-auto-rows:1fr;background:var(--border)}
+  #panes.g1{grid-template-columns:1fr}
+  #panes.g2{grid-template-columns:1fr 1fr;gap:2px}
+  #panes.g3{grid-template-columns:repeat(3,1fr);gap:2px}
+  #panes.g4{grid-template-columns:1fr 1fr;gap:2px}
+  #panes.g5{grid-template-columns:repeat(3,1fr);gap:2px}
+  .pane{position:relative;min-width:0;overflow:hidden;background:#000}
+  #panes:not(.g1) .pane.focused{outline:2px solid var(--cyan);outline-offset:-2px;z-index:2}
   .player-wrap{position:absolute;inset:0}
   .player-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-  .pane-tag{position:absolute;top:8px;left:8px;z-index:4;display:flex;align-items:center;gap:6px;max-width:78%;background:rgba(13,15,20,.82);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:20px;padding:4px 5px 4px 11px}
+  .pane-tag{position:absolute;top:8px;left:8px;z-index:4;display:flex;align-items:center;gap:6px;max-width:82%;background:rgba(13,15,20,.82);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:20px;padding:4px 5px 4px 6px}
+  .pane-tag .idx{flex:none;width:18px;height:18px;border-radius:6px;display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-size:10px;font-weight:600;color:var(--muted);background:var(--elev)}
   .pane-tag .plab{width:7px;height:7px;border-radius:50%;flex:none}
   .pane-tag .lab{font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .pane-tag .spk{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:var(--cyan);background:var(--elev)}
@@ -174,6 +179,37 @@
   .ctl.lock{color:var(--tally);border-color:rgba(255,68,94,.4)}
   .ctl.lock:hover:not(:disabled){background:rgba(255,68,94,.1);color:var(--tally)}
   .ctl span{white-space:nowrap}
+
+  /* LAYOUT POPOVER + SPEED TEST */
+  .layout-pop{position:fixed;left:12px;bottom:60px;width:min(320px,calc(100vw - 24px));background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);z-index:42;display:none;flex-direction:column;padding:12px}
+  .layout-pop.open{display:flex}
+  .lp-title{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted-2);padding:2px 2px 6px}
+  .lay-opts{display:flex;flex-direction:column;gap:3px}
+  .lay-opt{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:10px;color:var(--muted);text-align:left}
+  .lay-opt:hover{background:var(--elev);color:var(--text)}
+  .lay-opt.sel{background:var(--elev-2);color:var(--text)}
+  .lay-opt .lt{font-size:13.5px;font-weight:500}
+  .lay-opt .lc{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--cyan);opacity:0}
+  .lay-opt.sel .lc{opacity:1}
+  .mini{display:grid;gap:2px;width:30px;height:21px;flex:none}
+  .mini i{background:var(--muted-2);border-radius:2px}
+  .lay-opt.sel .mini i{background:var(--cyan)}
+  .mg1{grid-template-columns:1fr}
+  .mg2{grid-template-columns:1fr 1fr}
+  .mg3{grid-template-columns:repeat(3,1fr)}
+  .mg4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+  .mg5{grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr}
+  .lp-div{height:1px;background:var(--border);margin:9px 2px}
+  .speed-btn{height:38px;border-radius:10px;background:var(--elev);border:1px solid var(--border);color:var(--text);font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px}
+  .speed-btn:hover:not(:disabled){border-color:var(--muted-2)}
+  .speed-btn:disabled{opacity:.6;cursor:default}
+  .speed-out{font-size:12px;color:var(--muted);line-height:1.55;padding:8px 2px 2px}
+  .speed-out.err{color:var(--tally)}
+  .speed-out b{color:var(--text);font-weight:700}
+  .use-btn{margin-left:8px;background:var(--cyan);color:#04231f;font-weight:700;font-size:12px;padding:5px 12px;border-radius:8px;white-space:nowrap}
+  .use-btn:hover{filter:brightness(1.06)}
+  .speed-note{font-size:10.5px;color:var(--muted-2);margin-top:5px}
+  .spin-dot{display:inline-block;width:11px;height:11px;border:2px solid var(--muted-2);border-top-color:var(--cyan);border-radius:50%;animation:spin 1s linear infinite;vertical-align:-1px;margin-right:6px}
 
   /* WHO'S LIVE SHEET */
   .live-sheet{position:fixed;top:calc(var(--topbar-h) + 6px);left:12px;width:min(370px,calc(100vw - 24px));max-height:72vh;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);z-index:40;display:none;flex-direction:column;overflow:hidden}
@@ -232,7 +268,7 @@
     .chat-panel{position:fixed;top:var(--topbar-h);bottom:52px;right:0;z-index:14;width:min(360px,86vw);box-shadow:var(--shadow)}
     .ctl span{display:none}
     .ctl{padding:0 11px}
-    #panes.dual{flex-direction:column}
+    #panes.g2,#panes.g3,#panes.g4,#panes.g5{grid-template-columns:1fr 1fr}
   }
   @media (max-width:520px){
     .now-title .t{font-size:12.5px}
@@ -292,7 +328,7 @@
 
       <div class="controls">
         <div class="now-title" id="nowTitle"><span class="idle">No stream selected</span></div>
-        <button class="ctl" id="viewBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="8" height="14" rx="1"/><rect x="13" y="5" width="8" height="14" rx="1"/></svg><span>Dual view</span></button>
+        <button class="ctl" id="layoutBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Layout</span></button>
         <button class="ctl" id="audioBtn" disabled><span class="ico"></span><span>Sound</span></button>
         <button class="ctl" id="chatBtn" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></button>
         <button class="ctl" id="fsBtn" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg><span>Fullscreen</span></button>
@@ -314,6 +350,17 @@
   <div class="live-foot" id="liveFoot"></div>
 </div>
 
+<!-- LAYOUT + SPEED -->
+<div class="scrim light" id="layoutScrim"></div>
+<div class="layout-pop" id="layoutPop">
+  <div class="lp-title">Screens</div>
+  <div class="lay-opts" id="layOpts"></div>
+  <div class="lp-div"></div>
+  <div class="lp-title">Connection</div>
+  <button class="speed-btn" id="speedBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20a8 8 0 1 0-8-8"/><path d="M12 12l4-3"/></svg>Test my connection</button>
+  <div class="speed-out" id="speedOut">Estimates a safe number of simultaneous streams for your internet.</div>
+</div>
+
 <div id="lockLayer">
   <div class="lock-pill">
     <span class="txt">Screen <b>locked</b> — taps won't reach the stream</span>
@@ -326,20 +373,36 @@
 <script>
 (function(){
   "use strict";
-  var STORE="streambuddy.v2";
+  var STORE="streambuddy.v3";
   var HOST=location.hostname||"localhost";
   var PLATFORMS={twitch:"Twitch",youtube:"YouTube",kick:"Kick"};
+  var MAXSLOTS=5;
 
-  var state={streams:[],current:null,filter:"all",chatOpen:false,viewMode:"single",panes:{A:null,B:null},focus:"A",mute:{S:true,A:true,B:true}};
+  var state={streams:[],filter:"all",chatOpen:false,layout:1,slots:[null,null,null,null,null],focus:0,mute:[true,true,true,true,true],speed:null};
 
   function load(){
-    try{var raw=localStorage.getItem(STORE);if(raw){var d=JSON.parse(raw);
-      state.streams=d.streams||[];state.current=d.current||null;state.filter=d.filter||"all";
-      state.viewMode=d.viewMode||"single";state.panes=d.panes||{A:null,B:null};state.focus=d.focus||"A";
-      if(d.mute)state.mute=d.mute;}}catch(e){}
+    try{
+      var raw=localStorage.getItem(STORE);
+      if(raw){var d=JSON.parse(raw);
+        state.streams=d.streams||[];state.filter=d.filter||"all";
+        state.layout=Math.min(MAXSLOTS,Math.max(1,d.layout||1));
+        state.slots=(d.slots&&d.slots.length===MAXSLOTS)?d.slots:[null,null,null,null,null];
+        state.focus=Math.min(state.layout-1,Math.max(0,d.focus||0));
+        if(d.mute&&d.mute.length===MAXSLOTS)state.mute=d.mute;
+        state.speed=d.speed||null;
+        return;
+      }
+      // migrate from v2 (single/dual model)
+      var old=localStorage.getItem("streambuddy.v2");
+      if(old){var o=JSON.parse(old);
+        state.streams=o.streams||[];state.filter=o.filter||"all";
+        if(o.viewMode==="dual"){state.layout=2;state.slots[0]=(o.panes&&o.panes.A)||null;state.slots[1]=(o.panes&&o.panes.B)||null;}
+        else{state.layout=1;state.slots[0]=o.current||null;}
+      }
+    }catch(e){}
   }
   function save(){
-    try{localStorage.setItem(STORE,JSON.stringify({streams:state.streams,current:state.current,filter:state.filter,viewMode:state.viewMode,panes:state.panes,focus:state.focus,mute:state.mute}));}catch(e){}
+    try{localStorage.setItem(STORE,JSON.stringify({streams:state.streams,filter:state.filter,layout:state.layout,slots:state.slots,focus:state.focus,mute:state.mute,speed:state.speed}));}catch(e){}
   }
 
   /* ---- parsing ---- */
@@ -408,13 +471,11 @@
   function subLabel(s){return PLATFORMS[s.platform]+(s.type==="video"?" · vod":s.type==="ythandle"?" · handle":s.type==="ytchannel"?" · channel":"");}
   function toast(msg,err){var t=document.getElementById("toast");t.textContent=msg;t.className=err?"err show":"show";clearTimeout(t._t);t._t=setTimeout(function(){t.className=err?"err":"";},2600);}
 
-  function focusedStream(){return state.viewMode==="dual"?byId(state.panes[state.focus]):byId(state.current);}
+  function focusIdx(){return state.layout>1?state.focus:0;}
+  function focusedStream(){return byId(state.slots[focusIdx()]);}
 
   /* ---- actions ---- */
-  function setActive(id){
-    if(state.viewMode==="dual"){state.panes[state.focus]=id;}
-    else{state.current=id;}
-  }
+  function setActive(id){state.slots[focusIdx()]=id;}
   function addStream(){
     var input=document.getElementById("linkInput");
     var parsed=parseLink(input.value);
@@ -432,28 +493,63 @@
   function removeStream(id,ev){
     if(ev)ev.stopPropagation();
     state.streams=state.streams.filter(function(s){return s.id!==id;});
-    if(state.current===id)state.current=null;
-    if(state.panes.A===id)state.panes.A=null;
-    if(state.panes.B===id)state.panes.B=null;
+    for(var i=0;i<MAXSLOTS;i++){if(state.slots[i]===id)state.slots[i]=null;}
     save();render();
   }
   function toggleFav(id,ev){if(ev)ev.stopPropagation();var s=byId(id);if(!s)return;s.fav=!s.fav;save();render();}
-  function selectStream(id){setActive(id);var s=byId(id);if(state.chatOpen&&!hasChat(focusedStream()))state.chatOpen=false;save();render();closeMobileSidebar();}
-  function focusKey(){return state.viewMode==="dual"?state.focus:"S";}
+  function selectStream(id){setActive(id);if(state.chatOpen&&!hasChat(focusedStream()))state.chatOpen=false;save();render();closeMobileSidebar();}
   function toggleMute(k,ev){if(ev)ev.stopPropagation();state.mute[k]=!state.mute[k];save();renderStage();}
   function unmuteKey(k,ev){if(ev)ev.stopPropagation();state.mute[k]=false;save();renderStage();}
+  function setLayout(n){
+    n=Math.min(MAXSLOTS,Math.max(1,n));
+    if(state.focus>n-1)state.focus=n-1;
+    state.layout=n;save();render();
+  }
 
-  function setViewMode(mode){
-    if(mode===state.viewMode)return;
-    if(mode==="dual"){
-      if(!state.panes.A&&state.current)state.panes.A=state.current;
-      state.focus=state.panes.A?(state.panes.B?"A":"B"):"A";
-      if(!state.panes.A)state.focus="A";
-    }else{
-      var keep=state.panes[state.focus]||state.panes.A||state.panes.B||state.current;
-      state.current=keep;
-    }
-    state.viewMode=mode;save();render();
+  /* ---- layout popover ---- */
+  function buildLayoutOption(n){
+    var b=document.createElement("button");
+    b.className="lay-opt"+(state.layout===n?" sel":"");
+    var g=document.createElement("span");g.className="mini mg"+n;
+    for(var i=0;i<n;i++)g.appendChild(document.createElement("i"));
+    var t=document.createElement("span");t.className="lt";t.textContent=n+(n===1?" screen":" screens");
+    var c=document.createElement("span");c.className="lc";c.textContent="●";
+    b.appendChild(g);b.appendChild(t);b.appendChild(c);
+    b.addEventListener("click",function(){setLayout(n);closeLayout();});
+    return b;
+  }
+  function renderLayoutOptions(){
+    var wrap=document.getElementById("layOpts");wrap.innerHTML="";
+    for(var n=1;n<=MAXSLOTS;n++)wrap.appendChild(buildLayoutOption(n));
+  }
+  function openLayout(){renderLayoutOptions();document.getElementById("layoutPop").classList.add("open");document.getElementById("layoutScrim").classList.add("on");document.getElementById("layoutBtn").classList.add("on");}
+  function closeLayout(){document.getElementById("layoutPop").classList.remove("open");document.getElementById("layoutScrim").classList.remove("on");document.getElementById("layoutBtn").classList.remove("on");}
+
+  /* ---- speed test ---- */
+  function recFor(m){if(m<6)return 1;if(m<13)return 2;if(m<22)return 3;if(m<32)return 4;return 5;}
+  function testSpeed(){
+    var bytes=15000000;
+    var url="https://speed.cloudflare.com/__down?bytes="+bytes+"&t="+Date.now();
+    var start=performance.now();
+    var ctl=new AbortController();var to=setTimeout(function(){ctl.abort();},20000);
+    return fetch(url,{signal:ctl.signal,cache:"no-store"})
+      .then(function(r){if(!r.ok)throw new Error("http");return r.arrayBuffer();})
+      .then(function(buf){clearTimeout(to);var secs=(performance.now()-start)/1000;if(secs<=0)secs=0.001;
+        var mbps=(buf.byteLength*8)/secs/1e6;return{mbps:mbps,rec:recFor(mbps)};});
+  }
+  function runSpeed(){
+    var out=document.getElementById("speedOut"),btn=document.getElementById("speedBtn");
+    btn.disabled=true;out.className="speed-out";out.innerHTML='<span class="spin-dot"></span>Testing your connection…';
+    testSpeed().then(function(r){
+      state.speed=r;save();
+      var m=r.mbps>=100?Math.round(r.mbps):Math.round(r.mbps*10)/10;
+      out.innerHTML="\u2248 <b>"+m+" Mbps</b> down \u00b7 good for up to <b>"+r.rec+"</b> stream"+(r.rec>1?"s":"")+
+        ' <button class="use-btn" id="useRec">Use '+r.rec+'</button>'+
+        '<div class="speed-note">A conservative estimate \u2014 real capacity depends on each stream\u2019s quality setting.</div>';
+      var ur=document.getElementById("useRec");if(ur)ur.addEventListener("click",function(){setLayout(r.rec);closeLayout();});
+    }).catch(function(){
+      out.className="speed-out err";out.innerHTML="Couldn\u2019t measure your speed \u2014 the test needs to run in a normal browser (Safari/Chrome) with a live connection. Check your network and try again.";
+    }).then(function(){btn.disabled=false;});
   }
 
   /* ---- render ---- */
@@ -475,7 +571,7 @@
       em.innerHTML=state.streams.length===0?"Your library is empty.<br>Paste a link above to begin.":"No streams in this filter yet.";
       list.appendChild(em);
     }else{
-      var activeIds=state.viewMode==="dual"?[state.panes.A,state.panes.B]:[state.current];
+      var activeIds=state.slots.slice(0,state.layout);
       items.forEach(function(s){
         var row=document.createElement("div");
         row.className="chan"+(activeIds.indexOf(s.id)>=0?" active":"");
@@ -492,18 +588,17 @@
     renderStage();
   }
 
-  function setPh(wrap,mode,s,key){
+  function setPh(wrap,mode,s,compact){
     var p=wrap.querySelector(".ph");
     if(!p){p=document.createElement("div");p.className="ph";wrap.appendChild(p);}
     p.style.display="flex";
-    var compact=(key!=="S");
     p.className="ph"+(compact?" compact":"");
     if(mode==="handle"){
       p.innerHTML='<div class="rings"><span class="r"></span><span class="r" style="animation-delay:.8s"></span><span class="c"></span></div>'+
         '<h2>Can\u2019t embed a @handle</h2><p>YouTube handle links won\u2019t embed on their own. Open the channel\u2019s live video and paste that <b>watch?v=</b> link instead.</p>'+
         '<a class="open-link" href="'+watchUrl(s)+'" target="_blank" rel="noopener">Open on YouTube</a>';
     }else if(compact){
-      p.innerHTML='<div class="rings"><span class="r"></span><span class="c"></span></div><h2>Pane '+key+'</h2><p>Tap a stream in the list to load it here.</p>';
+      p.innerHTML='<div class="rings"><span class="r"></span><span class="c"></span></div><h2>Empty screen</h2><p>Tap this box, then pick a stream from the list.</p>';
     }else{
       p.innerHTML='<div class="rings"><span class="r"></span><span class="r" style="animation-delay:.8s"></span><span class="c"></span></div>'+
         '<h2>Nothing playing yet</h2><p>Paste a stream link up top to add it to your library. Everything is saved on this device and sorted by platform.</p>'+
@@ -515,12 +610,12 @@
       ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg>'
       : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg>';
   }
-  function updatePlayer(wrap,s,key,muted){
+  function updatePlayer(wrap,s,compact,muted){
     var iframe=wrap.querySelector("iframe");
     var hint=wrap.querySelector(".mute-hint");
-    if(!s){if(iframe)iframe.remove();if(hint)hint.classList.remove("show");setPh(wrap,"empty",null,key);return;}
+    if(!s){if(iframe)iframe.remove();if(hint)hint.classList.remove("show");setPh(wrap,"empty",null,compact);return;}
     var src=playerSrc(s,muted);
-    if(!src){if(iframe)iframe.remove();if(hint)hint.classList.remove("show");setPh(wrap,"handle",s,key);return;}
+    if(!src){if(iframe)iframe.remove();if(hint)hint.classList.remove("show");setPh(wrap,"handle",s,compact);return;}
     var p=wrap.querySelector(".ph");if(p)p.style.display="none";
     if(!iframe||iframe.getAttribute("data-src")!==src){
       if(iframe)iframe.remove();
@@ -535,67 +630,67 @@
     if(hint)hint.classList.toggle("show",!!muted);
   }
 
+  function buildPane(i){
+    var pane=document.createElement("div");
+    pane.className="pane";pane.setAttribute("data-idx",i);
+    var multi=state.layout>1;
+    var hintHtml='<button class="mute-hint" aria-label="Tap for sound">'+spkIcon(false)+'<span>Tap for sound</span></button>';
+    var tagHtml=multi?'<div class="pane-tag"><span class="idx">'+(i+1)+'</span><span class="plab"></span><span class="lab"></span><button class="spk" aria-label="Mute or unmute"></button><button class="pane-x" aria-label="Clear screen"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>':'';
+    pane.innerHTML='<div class="player-wrap">'+hintHtml+'</div>'+tagHtml;
+    pane.querySelector(".mute-hint").addEventListener("click",function(e){unmuteKey(i,e);});
+    if(multi){
+      pane.addEventListener("click",function(){state.focus=i;save();renderStage();});
+      pane.querySelector(".spk").addEventListener("click",function(e){toggleMute(i,e);});
+      pane.querySelector(".pane-x").addEventListener("click",function(e){e.stopPropagation();state.slots[i]=null;save();render();});
+    }
+    return pane;
+  }
+
   function renderStage(){
     var panes=document.getElementById("panes");
-    var keys=state.viewMode==="dual"?["A","B"]:["S"];
-    panes.classList.toggle("dual",state.viewMode==="dual");
-    if(panes.getAttribute("data-keys")!==keys.join("")){
-      panes.setAttribute("data-keys",keys.join(""));
+    var n=state.layout,multi=n>1;
+    panes.className="g"+n;
+    if(panes.getAttribute("data-n")!==String(n)){
+      panes.setAttribute("data-n",String(n));
       panes.innerHTML="";
-      keys.forEach(function(k){
-        var pane=document.createElement("div");
-        pane.className="pane";pane.setAttribute("data-pane",k);
-        var hintHtml='<button class="mute-hint" aria-label="Tap for sound">'+spkIcon(false)+'<span>Tap for sound</span></button>';
-        var tagHtml=state.viewMode==="dual"?'<div class="pane-tag"><span class="plab"></span><span class="lab"></span><button class="spk" aria-label="Mute or unmute"></button><button class="pane-x" aria-label="Clear pane"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>':'';
-        pane.innerHTML='<div class="player-wrap">'+hintHtml+'</div>'+tagHtml;
-        pane.querySelector(".mute-hint").addEventListener("click",function(e){unmuteKey(k,e);});
-        if(state.viewMode==="dual"){
-          pane.addEventListener("click",function(){state.focus=k;save();renderStage();});
-          pane.querySelector(".spk").addEventListener("click",function(e){toggleMute(k,e);});
-          pane.querySelector(".pane-x").addEventListener("click",function(e){e.stopPropagation();state.panes[k]=null;save();render();});
-        }
-        panes.appendChild(pane);
-      });
+      for(var i=0;i<n;i++)panes.appendChild(buildPane(i));
     }
-    keys.forEach(function(k){
-      var pane=panes.querySelector('[data-pane="'+k+'"]');
-      var s=k==="S"?byId(state.current):byId(state.panes[k]);
-      var muted=!!state.mute[k];
-      pane.classList.toggle("focused",state.viewMode==="dual"&&state.focus===k);
-      updatePlayer(pane.querySelector(".player-wrap"),s,k,muted);
-      if(state.viewMode==="dual"){
+    for(var i=0;i<n;i++){
+      var pane=panes.children[i];
+      var st=byId(state.slots[i]);
+      var muted=!!state.mute[i];
+      pane.classList.toggle("focused",multi&&state.focus===i);
+      updatePlayer(pane.querySelector(".player-wrap"),st,multi,muted);
+      if(multi){
         var lab=pane.querySelector(".lab"),plab=pane.querySelector(".plab"),spk=pane.querySelector(".spk");
-        lab.textContent=s?cleanLabel(s):("Pane "+k+" — tap a stream");
-        plab.style.background=s?"var(--"+s.platform+")":"var(--muted-2)";
-        spk.innerHTML=spkIcon(muted);
-        spk.classList.toggle("muted",muted);
-        spk.style.display=s?"grid":"none";
+        lab.textContent=st?cleanLabel(st):"Empty — tap a stream";
+        plab.style.background=st?"var(--"+st.platform+")":"var(--muted-2)";
+        spk.innerHTML=spkIcon(muted);spk.classList.toggle("muted",muted);spk.style.display=st?"grid":"none";
       }
-    });
+    }
 
-    // view toggle button
-    var viewBtn=document.getElementById("viewBtn");
-    viewBtn.classList.toggle("on",state.viewMode==="dual");
-    viewBtn.querySelector("span").textContent=state.viewMode==="dual"?"Single view":"Dual view";
+    // layout button label
+    var layoutBtn=document.getElementById("layoutBtn");
+    layoutBtn.querySelector("span").textContent=n===1?"Layout":n+" screens";
 
     // controls + now-title
     var s=focusedStream();
-    var anyStream=state.viewMode==="dual"?!!(state.panes.A||state.panes.B):!!state.current;
+    var anyStream=false;for(var j=0;j<n;j++){if(state.slots[j]){anyStream=true;break;}}
     var chatBtn=document.getElementById("chatBtn"),fsBtn=document.getElementById("fsBtn"),lockBtn=document.getElementById("lockBtn"),nowTitle=document.getElementById("nowTitle"),audioBtn=document.getElementById("audioBtn");
     fsBtn.disabled=lockBtn.disabled=!anyStream;
-    var fk=focusKey(),fkMuted=!!state.mute[fk];
+    var fi=focusIdx(),fmuted=!!state.mute[fi];
     audioBtn.disabled=!s;
-    audioBtn.classList.toggle("on",!!s&&!fkMuted);
-    audioBtn.querySelector(".ico").innerHTML=spkIcon(fkMuted);
-    audioBtn.querySelector("span").textContent=fkMuted?"Sound off":"Sound on";
+    audioBtn.classList.toggle("on",!!s&&!fmuted);
+    audioBtn.querySelector(".ico").innerHTML=spkIcon(fmuted);
+    audioBtn.querySelector("span").textContent=fmuted?"Sound off":"Sound on";
     var canChat=hasChat(s);
     chatBtn.disabled=!canChat;
     chatBtn.title=canChat?"":"Live chat isn't available for this link";
     if(!canChat&&state.chatOpen)state.chatOpen=false;
     chatBtn.classList.toggle("on",state.chatOpen);
 
-    if(!s){nowTitle.innerHTML='<span class="idle">'+(state.viewMode==="dual"?"Pane "+state.focus+" is empty":"No stream selected")+'</span>';}
-    else{nowTitle.innerHTML=(state.viewMode==="dual"?'<span class="p">'+state.focus+'</span>':'')+'<span class="pdot" style="background:var(--'+s.platform+')"></span><span class="t">'+esc(cleanLabel(s))+'</span><span class="p">'+PLATFORMS[s.platform]+'</span>';}
+    if(!s){nowTitle.innerHTML='<span class="idle">'+(multi?"Screen "+(fi+1)+" is empty":"No stream selected")+'</span>';}
+    else{nowTitle.innerHTML=(multi?'<span class="p">'+(fi+1)+'</span>':'')+'<span class="pdot" style="background:var(--'+s.platform+')"></span><span class="t">'+esc(cleanLabel(s))+'</span><span class="p">'+PLATFORMS[s.platform]+'</span>';}
 
     // chat
     var panel=document.getElementById("chatPanel"),frame=document.getElementById("chatFrame");
@@ -697,8 +792,10 @@
     document.getElementById("addBtn").addEventListener("click",addStream);
     document.getElementById("linkInput").addEventListener("keydown",function(e){if(e.key==="Enter")addStream();});
     document.querySelectorAll(".filter").forEach(function(b){b.addEventListener("click",function(){state.filter=b.dataset.filter;save();render();});});
-    document.getElementById("viewBtn").addEventListener("click",function(){setViewMode(state.viewMode==="dual"?"single":"dual");});
-    document.getElementById("audioBtn").addEventListener("click",function(){if(this.disabled)return;toggleMute(focusKey());});
+    document.getElementById("layoutBtn").addEventListener("click",function(){var open=document.getElementById("layoutPop").classList.contains("open");if(open)closeLayout();else openLayout();});
+    document.getElementById("layoutScrim").addEventListener("click",closeLayout);
+    document.getElementById("speedBtn").addEventListener("click",runSpeed);
+    document.getElementById("audioBtn").addEventListener("click",function(){if(this.disabled)return;toggleMute(focusIdx());});
     document.getElementById("chatBtn").addEventListener("click",function(){if(this.disabled)return;state.chatOpen=!state.chatOpen;save();renderStage();});
     document.getElementById("chatClose").addEventListener("click",function(){state.chatOpen=false;renderStage();});
     document.getElementById("fsBtn").addEventListener("click",function(){if(!this.disabled)toggleFull();});
